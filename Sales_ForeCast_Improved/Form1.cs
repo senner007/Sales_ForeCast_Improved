@@ -26,44 +26,43 @@ namespace Sales_ForeCast_Improved
         {
             return Int32.TryParse(s, out int parsed) && parsed > -1 || s == "" ? parsed : -1;
         }
-        List<int> ValidateTextboxes (params object[] list)
+        string FindTextBoxByTag(object Tag)
         {
-            var returnList = new List<int>();
-            foreach (string tbTag in list)
-            {
-                int validated = Validate(this.Controls.OfType<TextBox>().FirstOrDefault(t => (string)t.Tag == tbTag).Text);
-                if (validated == -1)
-                {
-                    ToggleErrorLabel(tbTag, true);              
-                }   
-                else
-                {
-                    ToggleErrorLabel(tbTag, false);
-                    returnList.Add(validated);
-                }
-            }
-            return returnList.Count() == list.Count() ? returnList : new List<int>();
+            return this.Controls.OfType<TextBox>().FirstOrDefault(t => t.Tag == Tag).Text;
+        }
+        List<int> UserTextToInt (List<Object> list)
+        {
+            return list.Select(l => Validate(FindTextBoxByTag(l))).ToList();
+        }
+        void ShowErrorLabels(List<Object> list)
+        {
+            list.ForEach(l => ToggleErrorLabel( l.ToString(), Validate(FindTextBoxByTag(l)) == -1 ));
         }
 
-        void ToggleErrorLabel (string s, bool onOff) => this.Controls.OfType<Label>().FirstOrDefault(w => (string)w.Tag == "error" + s).Visible = onOff;
+        void ToggleErrorLabel (string s, bool onOff) => this.Controls.OfType<Label>().FirstOrDefault(w => (string)w.Tag == "error_" + s).Visible = onOff;
      //  void ClearErrorLabels() => this.Controls.OfType<Label>().Where(l => l.Tag.ToString().StartsWith("error")).ToList().ForEach(l => l.Visible = false);
 
         private void button1_Click(object sender, EventArgs e)
         {
 
-            var validated = ValidateTextboxes(
+            List<Object> userInput = new List<object>()
+            {
                    this.ticketsSold.Tag,
                    this.tvCover.Tag,
-                   this.sportsVisitors.Tag
-                );
+                   this.sportsVisitors.Tag,
+                   this.fitnessSubscribers.Tag,
+                   this.visitorsAppear.Tag
+            };
 
-            if (validated.Count() != 0)
+            var userTextToInt = UserTextToInt(userInput);
+
+            ShowErrorLabels(userInput);
+
+            if (userTextToInt.IndexOf(-1) == -1)
             {
-              //  Console.WriteLine(Convert.ToDateTime(dateTimePicker1.Value));
-                // dateTimePicker skal valideres først
                 SalesForecastPlural.list.Add(
                     Convert.ToDateTime(dateTimePicker1.Value).ToShortDateString() + " " + DateTime.Now.ToString("hh.mm.ss.ff"), 
-                    new SalesForecast(validated[0], validated[1], validated[2] )
+                    new SalesForecast(userTextToInt)
                     );
 
                 Console.WriteLine(string.Join("", SalesForecastPlural
@@ -71,7 +70,10 @@ namespace Sales_ForeCast_Improved
                     " \n - Forecast: " +
                     " Tickets Sold: " + x.Value.TicketsSold +
                     ", TV Cover: " + x.Value.TVCover +
-                    ", Sports Visitors: " + x.Value.SportsVisitors).ToArray())
+                    ", Sports Visitors: " + x.Value.SportsVisitors +
+                    ", Fitness Subsribers: " + x.Value.FitnessSubscribers +
+                    ", Visitors appear: " + x.Value.VisitorsAppear
+                    ).ToArray())
                  );
                    
 
@@ -89,11 +91,15 @@ namespace Sales_ForeCast_Improved
         public int TicketsSold { get; private set; }
         public int TVCover { get; private set; }
         public int SportsVisitors { get; private set; }
-        public SalesForecast(int ticketsSold, int tvCover, int sportsVisitors)
+        public int FitnessSubscribers { get; private set; }
+        public int VisitorsAppear { get; private set; }
+        public SalesForecast(List<int> validatedInput)
         {
-            TicketsSold = ticketsSold;
-            TVCover = tvCover;
-            SportsVisitors = sportsVisitors;
+            TicketsSold = validatedInput[0];
+            TVCover = validatedInput[1];
+            SportsVisitors = validatedInput[2];
+            FitnessSubscribers = validatedInput[3];
+            VisitorsAppear = validatedInput[4];
         }
     }
     static class SalesForecastPlural
