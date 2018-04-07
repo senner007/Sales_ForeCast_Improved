@@ -63,21 +63,19 @@ namespace Sales_ForeCast_Improved
         }
         /*
          *  
-         *  Events
+         *   - Events -
          *  
          */
 
         private void calculateButton_Click(object sender, EventArgs e)
         {
-            var inputTags = GetInputTags();
-            var userTextToInt = UserTextToInt(inputTags);
+            var userTextToInt = UserTextToInt(GetInputTags());
 
-            ToggleLabels(inputTags, userTextToInt, ToggleErrorLabel);
+            ToggleLabels(GetInputTags(), userTextToInt, ToggleErrorLabel);
 
             if (userTextToInt.IndexOf(-1) == -1)
             {
                 SalesForecast salesForecast = new SalesForecast(userTextToInt);
-                Console.WriteLine(salesForecast.FitnessSubscribers);
                 showCalculationsButton.Enabled = true;
             }
         }
@@ -104,20 +102,7 @@ namespace Sales_ForeCast_Improved
             );
 
             Form2 f2 = new Form2();
-            SalesForecastPlural.GetDict().ToList().ForEach(l =>
-
-                f2.SetRow(
-                    l.Key,
-                    l.Value.TicketsSold,
-                    l.Value.TVCover,
-                    l.Value.SportsVisitors,
-                    l.Value.FitnessSubscribers,
-                    l.Value.VisitorsAppear,
-                    l.Value.TotalSales,
-                    l.Value.TotalExpenses,
-                    l.Value.TotalEarnings
-                )
-            );
+            SalesForecastPlural.GetDict().ToList().ForEach(l => f2.SetRow( l.Key, l.Value.ReturnAsList ) );
             f2.Show();
 
             showCalculationsButton.Enabled = false;
