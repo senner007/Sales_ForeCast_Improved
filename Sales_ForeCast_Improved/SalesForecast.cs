@@ -18,35 +18,15 @@ namespace Sales_ForeCast_Improved
                  Mult(Constants.SALG_DRIKKEVARE_GENNEMSNIT, validatedInput[0], (Convert.ToDecimal(validatedInput[4]) / 100))
             );
 
-            CalculateExpenses();
-            CalculateEarnings();
+            TotalExpenses = TotalSales * Constants.TOTAL_OMK_I_PCT;
+            TotalEarnings = TotalSales - TotalExpenses;
 
-            ReturnAsList = new List<decimal>
-            {
-                validatedInput[0],
-                validatedInput[1],
-                validatedInput[2],
-                validatedInput[3],
-                validatedInput[4],
-                TotalSales,
-                TotalExpenses,
-                TotalEarnings
-            };
-
+            DataInputAsList = validatedInput;
         }
         public decimal TotalSales { get; private set; }
         public decimal TotalEarnings { get; private set; }
         public decimal TotalExpenses { get; private set; }
-
-        private void CalculateEarnings()
-        {
-            TotalEarnings = TotalSales - TotalExpenses;
-        }
-        private void CalculateExpenses()
-        {
-            TotalExpenses = TotalSales * Constants.TOTAL_OMK_I_PCT;
-        }
-        public List<decimal> ReturnAsList { get; private set; }
+        public List<int> DataInputAsList { get; private set; }
 
         Calculate Mult = vals => vals.Aggregate((a, b) => a * b);
         Calculate SumUp = vals => vals.Sum();

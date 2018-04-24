@@ -17,9 +17,9 @@ namespace Sales_ForeCast_Improved
             InitializeComponent();
             
         }
-        public void SetRow(string date, List<decimal> list)
+        public void SetRow(string date, List<int> list, decimal totalSales, decimal totalExpenses, decimal totalEarnings)
         {
-            this.dataGridView1.Rows.Add( date, list[0], list[1], list[2], list[3], list[4], list[5], list[6], list[7]);
+            this.dataGridView1.Rows.Add( date, list[0], list[1], list[2], list[3], list[4], totalSales, totalExpenses, totalEarnings);
         }
     }
 }

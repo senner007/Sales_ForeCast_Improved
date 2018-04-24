@@ -23,32 +23,44 @@ namespace Sales_ForeCast_Improved
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
-         
+        /*
+             UserTextToInt function
+
+        */
         List<int> UserTextToInt(List<Object> tbTags)
         {
-            int Validate(string inputText) => Int32.TryParse(inputText, out int parsed) && parsed > -1 || inputText == "" ? parsed : -1;         
-            string FindTextBoxByTag(object Tag) =>this.Controls.OfType<TextBox>().FirstOrDefault(t => t.Tag == Tag).Text;          
-            return tbTags.Select(l => Validate(FindTextBoxByTag(l))).ToList();
+            // Validate function - Returns -1 if conversion to int fails
+            int Validate(string inputText) => Int32.TryParse(inputText, out int parsed) && parsed > -1 || inputText == "" ? parsed : -1;
+            // FindTextBoxByTag function
+            string FindTextByTag(object Tag) => this.Controls.OfType<TextBox>().FirstOrDefault(t => t.Tag == Tag).Text;        
+            
+            return tbTags.Select(t => Validate(FindTextByTag(t))).ToList();
         }
+        /*
+            ToggleErrorLabel function
+        */
         void ToggleErrorLabel(Object tag, bool onOff)
-        {
-            // TODO : hvordan bruges defaultifempty?!
-            try
-            {
-                this.Controls.OfType<Label>().First(l => l.Tag.ToString() == "error_" + tag).Visible = onOff;
-            }
-            catch { }
+        {          
+                this.Controls.OfType<Label>().Where(l => l.Tag.ToString() == "error_" + tag).ToList().ForEach(l => l.Visible = onOff);              
         }
-        void ToggleLabels(List<Object> tbTags, List<int> validatedInts, Action<Object, bool> TEL)
+        /*
+             ToggleLabels function
+        */
+        void ToggleLabels(List<Object> tbTags, List<int> validatedInts, Action<Object, bool> FUNC)
         {
             int counter = 0;
-            tbTags.ForEach(t => TEL(t, validatedInts[counter++] < 0));
+            tbTags.ForEach(t => FUNC(t, validatedInts[counter++] < 0));
         }
-             
-        void Clear(Control ctrl, Action<Object, bool> TEL)
+        /*
+             Clear function
+        */
+        void Clear(Action<Object, bool> FUNC)
         {
-            ctrl.Controls.OfType<TextBox>().ToList().ForEach(t => { t.Text = ""; TEL(t.Tag, false); });
+            this.Controls.OfType<TextBox>().ToList().ForEach(t => { t.Text = ""; FUNC(t.Tag, false); });
         }
+        /*
+            GetInputTags function
+        */
         List<Object> GetInputTags()
         {
             return new List<object>()
@@ -69,13 +81,13 @@ namespace Sales_ForeCast_Improved
 
         private void calculateButton_Click(object sender, EventArgs e)
         {
-            var userTextToInt = UserTextToInt(GetInputTags());
+            var intetegers = UserTextToInt(GetInputTags());
 
-            ToggleLabels(GetInputTags(), userTextToInt, ToggleErrorLabel);
+            ToggleLabels(GetInputTags(), intetegers, ToggleErrorLabel);
 
-            if (userTextToInt.IndexOf(-1) == -1)
+            if (intetegers.IndexOf(-1) == -1)
             {
-                SalesForecast salesForecast = new SalesForecast(userTextToInt);
+                SalesForecast salesForecast = new SalesForecast(intetegers);
                 showCalculationsButton.Enabled = true;
             }
         }
@@ -86,7 +98,7 @@ namespace Sales_ForeCast_Improved
         }
         private void resetButton_Click(object sender, EventArgs e)
         {
-            Clear(this, ToggleErrorLabel);
+            Clear(ToggleErrorLabel);
         }
 
         private void OnTextChanged(object sender, EventArgs e)
@@ -102,7 +114,10 @@ namespace Sales_ForeCast_Improved
             );
 
             Form2 f2 = new Form2();
-            SalesForecastPlural.GetDict().ToList().ForEach(l => f2.SetRow( l.Key, l.Value.ReturnAsList ) );
+            SalesForecastPlural.GetDict().ToList().ForEach(l => f2.SetRow( 
+                l.Key, l.Value.DataInputAsList, l.Value.TotalSales, l.Value.TotalExpenses, l.Value.TotalEarnings
+               ) 
+            );
             f2.Show();
 
             showCalculationsButton.Enabled = false;
